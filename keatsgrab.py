@@ -18,7 +18,12 @@ class Grabber:
         self._username = username
         self._password = password
 
-    def _login(self):
+        self._items = {}
+
+    def _get_urls(self):
+        return ['http://keats.kcl.ac.uk/course/view.php?id=22751']
+
+    def _do_login(self):
         values = {'username': self._username,
             'password': self._password,
             'rememberusername': 0}
@@ -27,10 +32,13 @@ class Grabber:
         cj = cookielib.CookieJar()
         opener = urllib2.build_opener(_NoRedirection, urllib2.HTTPCookieProcessor(cj))
         response = opener.open(self._LOGIN_URL, data)
-        print response.info().getheader('Set-Cookie')
+        return response.info().getheader('Set-Cookie')[50:91]
 
     def do_grab(self):
-        self._login()
+        self._cookie = self._do_login()
+
+        for url in self._get_urls():
+            print url
 
     def get_json(self):
         pass
