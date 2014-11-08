@@ -135,6 +135,8 @@ class Grabber:
             elif '/mod/forum/view.php' in url:
                 self._parse_forum_index_page(self._get_page(url))
 
+        self._items_flat = sorted(self._items_flat, key=lambda k: k['timestamp'])
+
 if __name__ == '__main__':
     grabber = Grabber(sys.argv[1], sys.argv[2])
     grabber.do_grab()
