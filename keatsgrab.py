@@ -33,9 +33,19 @@ class Grabber:
         response = opener.open(url)
         return response.read()
 
+    def _get_course_name_from_page(self, page):
+        for line in page.split('\n'):
+            if 'Current course' in line:
+                course = self._re_course_current_course.search(line).group(1)
+                if course not in self._items:
+                    self._items[course] = {}
+
+        return course
+
     def _get_urls(self):
         return ['http://keats.kcl.ac.uk/course/view.php?id=22751',
-            'http://keats.kcl.ac.uk/course/view.php?id=22743']
+            'http://keats.kcl.ac.uk/course/view.php?id=22743',
+            'http://keats.kcl.ac.uk/mod/forum/view.php?id=719368']
 
     def _do_login(self):
         values = {'username': self._username,
@@ -49,11 +59,7 @@ class Grabber:
         return response.info().getheader('Set-Cookie')[50:91]
 
     def _parse_course_page(self, page):
-        for line in page.split('\n'):
-            if 'Current course' in line:
-                course = self._re_course_current_course.search(line).group(1)
-                if course not in self._items:
-                    self._items[course] = {}
+        course = self._get_course_name_from_page(page)
 
         tree = lxml.html.fromstring(page)
         sections = tree.xpath('//h3/text()')
@@ -91,12 +97,43 @@ class Grabber:
                             'course_section': sections[s_index]
                         })
 
+    def _parse_forum_index_page(self, page):
+        course = self._get_course_name_from_page(page)
+
+        tree = lxml.html.fromstring(page)
+        forum_name = tree.xpath('//div[@class="no-overflow"]/text()')[0]
+
+        trs = tree.xpath('//tr')
+        first = True
+        for tr in trs:
+            if first:
+                first = False
+                continue
+
+            topic_url = tr.getchildren()[0].getchildren()[0].get('href')
+            topic_name = tr.getchildren()[0].getchildren()[0].text
+            topic_author = tr.getchildren()[2].getchildren()[0].text
+            topic_lastpost = tr.getchildren()[4].getchildren()[2].text
+            topic_lastpost = time.mktime(time.strptime(topic_lastpost.split(',')[1].strip(), '%d %b %Y'))
+            topic_lastpost = int(topic_lastpost)
+
+            if topic_url not in self._items:
+                self._items_flat.append({
+                    'type': 'forum_post',
+                    'url': topic_url,
+                    'name': topic_name,
+                    'author': topic_author,
+                    'timestamp': topic_lastpost
+                    })
+
     def do_grab(self):
         self._cookie = self._do_login()
 
         for url in self._get_urls():
             if '/course/' in url:
                 self._parse_course_page(self._get_page(url))
+            elif '/mod/forum/view.php' in url:
+                self._parse_forum_index_page(self._get_page(url))
 
 if __name__ == '__main__':
     grabber = Grabber(sys.argv[1], sys.argv[2])
