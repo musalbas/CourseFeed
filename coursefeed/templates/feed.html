@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+		<title>CourseFeed</title>
+
+		<meta name="viewport" content="width=devic-width, initial-scale=1.0">
+
+		<link href="static/css/bootstrap.min.css" rel="stylesheet">
+		<link href="static/css/styles.css" rel="stylesheet">
+
+	</head>
+
+
+	<body>
+
+		<div class="navbar navbar-default navbar-fixed-top">
+			<div class="container">
+
+				<div class="navbar-header">
+				
+					<a href="#" class="navbar-brand"><font color="cadetblue">CourseFeed</font></a>
+
+					<button class = "navbar-toggle" data-toggle = "collapse" data-target = ".navHeaderCollapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+
+				</div>
+
+
+                <div class = "collapse navbar-collapse navHeaderCollapse">
+                               
+                	<ul class = "nav navbar-nav navbar-right">
+                                       
+                		<li class = "active"><a href = "/"><font color="cadetblue">Feed</font></a></li>
+                    	<li><a href = "#" class="dropdown-toggle" data-toggle = "dropdown"><font color="cadetblue">Courses</font><b class = "caret"></b></a>
+                    		<ul class="dropdown-menu">
+                    			<li><a href = "#"><font color="cadetblue">5CCS2SEG 14~15 1</font></a></li>
+                                <li><a href = "#"><font color="cadetblue">5CCS2CSL 14~15 SEM1 1</font></a></li>
+                    		</ul>
+                    	</li>
+                   	 <li><a href = "#" class="dropdown-toggle" data-toggle = "dropdown"><font color="cadetblue">User</font><b class = "caret"></b></a>
+                   	 	<ul class="dropdown-menu">
+                    		<li><a href = "#"><font color="cadetblue">Log Out</font></a></li>
+                    	</ul>
+                   	 </li>
+                 	</ul>
+                               
+                </div>
+			</div>
+		</div>	
+
+		<div class="container">
+			<div class="jumbotron">
+				<center><h1><font color="darkslateblue">Welcome to CourseFeed!</font></h1></center>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="row">
+            {% for item in feed %}
+                {% if item.type == 'forum_post' %}
+				<div class="col-md-4">
+					<h3><a href="{{ item.url }}" target="_blank"><font color="darkslateblue">New post: {{ item.name }}</font></a></h3>
+					<p><font color="cadetblue">New post in <strong>{{ item.forum_name }}</strong> by <strong>{{ item.author }}</strong> on <strong>{{ item.timestamp }}</strong>.</font></p>
+				</div>
+                {% endif %}
+                
+                {% if item.type == 'course_material' %}
+				<div class="col-md-4">
+					<h3><a href="{{ item.url }}" target="_blank"><font color="darkslateblue">New file: {{ item.name }}</font></a></h3>
+					<p><font color="cadetblue">New file in <strong>{{ item.course_section }}</strong> for <strong>{{ item.course }}</strong> on <strong>{{ item.timestamp }}</strong>.</font></p>
+				</div>
+                {% endif %}
+            {% endfor %}
+
+			</div>
+		</div>
+
+		<script src = "http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src = "static/js/bootstrap.js"></script>
+		
+
+	</body>
+
+</html>

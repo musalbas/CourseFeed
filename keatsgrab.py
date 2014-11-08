@@ -1,6 +1,7 @@
 import cookielib
 import time
 import re
+import json
 import urllib
 import urllib2
 import sys
@@ -94,7 +95,8 @@ class Grabber:
                             'name': doc_name,
                             'timestamp': timestamp,
                             'course': course,
-                            'course_section': sections[s_index]
+                            'course_section': sections[s_index],
+                            'url': doc_url
                         })
 
     def _parse_forum_index_page(self, page):
@@ -123,7 +125,8 @@ class Grabber:
                     'url': topic_url,
                     'name': topic_name,
                     'author': topic_author,
-                    'timestamp': topic_lastpost
+                    'timestamp': topic_lastpost,
+                    'forum_name': forum_name
                     })
 
     def do_grab(self):
@@ -140,4 +143,4 @@ class Grabber:
 if __name__ == '__main__':
     grabber = Grabber(sys.argv[1], sys.argv[2])
     grabber.do_grab()
-    print grabber._items_flat
+    print json.dumps(grabber._items_flat)
