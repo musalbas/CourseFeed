@@ -25,6 +25,7 @@ class Grabber:
         self._password = password
 
         self._items = {}
+        self._items_flat = []
 
     def _get_page(self, url):
         opener = urllib2.build_opener()
@@ -60,6 +61,7 @@ class Grabber:
         for section in sections:
             if section not in self._items[course]:
                 self._items[course][section] = {}
+                self._items[course][section]['course_material'] = {}
 
         for element in tree.xpath('//a'):
             if element.get('onclick'):
@@ -75,10 +77,19 @@ class Grabber:
                         break
 
                 if doc_url not in self._items[course][sections[s_index]]:
-                    self._items[course][sections[s_index]][doc_url] = {
+                    timestamp = int(time.time())
+                    self._items[course][sections[s_index]]['course_material'][doc_url] = {
                         'name': doc_name,
-                        'time': int(time.time())
+                        'time': timestamp
                         }
+
+                    self._items_flat.append({
+                            'type': 'course_material',
+                            'name': doc_name,
+                            'timestamp': timestamp,
+                            'course': course,
+                            'course_section': sections[s_index]
+                        })
 
     def do_grab(self):
         self._cookie = self._do_login()
@@ -90,4 +101,4 @@ class Grabber:
 if __name__ == '__main__':
     grabber = Grabber(sys.argv[1], sys.argv[2])
     grabber.do_grab()
-    print grabber._items
+    print grabber._items_flat
