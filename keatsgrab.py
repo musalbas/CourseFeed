@@ -1,8 +1,11 @@
 import cookielib
+import time
 import re
 import urllib
 import urllib2
 import sys
+
+import lxml.html
 
 class _NoRedirection(urllib2.HTTPErrorProcessor):
 
@@ -50,6 +53,32 @@ class Grabber:
                 course = self._re_course_current_course.search(line).group(1)
                 if course not in self._items:
                     self._items[course] = {}
+
+        tree = lxml.html.fromstring(page)
+        sections = tree.xpath('//h3/text()')
+
+        for section in sections:
+            if section not in self._items[course]:
+                self._items[course][section] = {}
+
+        for element in tree.xpath('//a'):
+            if element.get('onclick'):
+                doc_url = element.get('href')
+                doc_name = element.getchildren()[1].text
+
+                for s_index in range(len(sections)):
+                    if s_index == len(sections) - 1:
+                        doc_section = sections[s_index]
+
+                    if page.index(sections[s_index]) < page.index(doc_name) < page.index(sections[s_index + 1]):
+                        doc_section = sections[s_index]
+                        break
+
+                if doc_url not in self._items[course][sections[s_index]]:
+                    self._items[course][sections[s_index]][doc_url] = {
+                        'name': doc_name,
+                        'time': int(time.time())
+                        }
 
     def do_grab(self):
         self._cookie = self._do_login()
